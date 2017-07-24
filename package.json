@@ -1,5 +1,12 @@
 {
-  "name"    : "minecampfAutoBackup",
-  "version" : "0.1.0",
-  "main"    : "main.js"
+	"name": "minecampfAutoBackup",
+	"version": "0.1.0",
+	"main": "main.js",
+	"dependencies": {
+		"electron": "^1.6.11",
+		"vue-cli": "^2.8.2"
+	},
+	"scripts": {
+		"start": "electron ."
+	}
 }
