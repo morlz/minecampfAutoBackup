@@ -3,13 +3,52 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>MineCamp Auto Backup</title>
+		<link rel="stylesheet/less" type="text/css" href="css/main.less" />
+		<script type="text/javascript" src="js/less.min.js"></script>
 	</head>
 	<body>
 		<div class="main">
-			<input type="text" v-model="backupFolder">
-			<input type="text" v-model="worldFolder">
-			<input type="text" v-model="interval">
-			<input type="text" v-model="index">
+			<article>
+				<div class="title">Backup folder:</div>
+				<input type="text" v-model="backupFolder.path">
+				<div class="status" v-text="backupFolder.status"></div>
+			</article>
+			<article>
+				<div class="title">World folder:</div>
+				<input type="text" v-model="worldFolder.path">
+				<div class="status" v-text="worldFolder.status"></div>
+			</article>
+			<article>
+				<div class="title">Server exec:</div>
+				<input type="text" v-model="serverExec.path">
+				<div class="status" v-text="serverExec.status"></div>
+			</article>
+			<article>
+				<div class="lr">
+					<div class="item">
+						<div class="title">Backup interval (s):</div>
+						<input type="text" v-model="interval" class="inpInt">
+					</div>
+					<div class="item">
+						<div class="title">Next backup in (s):</div>
+						<input type="text" v-model="nextBackup" class="inpInt" disabled onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+					</div>
+					<div class="item">
+						<div class="title">backup index:</div>
+						<input type="text" v-model="index" class="inpInt" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+					</div>
+					<div class="item">
+						<div class="button" v-if="enabled" @click="switchEnabled">Stop</div>
+						<div class="button" v-else="enabled" @click="switchEnabled">Start</div>
+					</div>
+					<div class="item">
+						<div class="button" @click="backupNow">Backup Now</div>
+					</div>
+				</div>
+			</article>
+			<article>
+
+			</article>
 		</div>
 		<script type="text/javascript" src="render.js"></script>
 	</body>

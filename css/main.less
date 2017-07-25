@@ -1,0 +1,61 @@
+html, body {
+	width: 700px;
+	height: 400px;
+	padding: 0;
+	margin: 0;
+}
+.main {
+	width: 700px;
+	padding: 30px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	article {
+		margin: 10px 0;
+		&:last-child {
+			margin-bottom: 0;
+		}
+		input {
+			width: 635px;
+			background: rgba(0, 0, 0, 0.1);
+			border: 0;
+			padding: 10px;
+			transition: all 0.3s;
+			&:focus {
+				outline: none;
+				background: rgba(0, 0, 0, 0.05);
+			}
+			&:disabled {
+				background: rgba(0, 0, 0, 0.05);
+				color: gray;
+			}
+		}
+		.inpInt {
+			width: 50px;
+		}
+		.status {
+			&:before {
+				content: "Status: ";
+			}
+		}
+		.lr {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+		}
+	}
+}
+
+.button {
+	margin: 0 10px;
+	background: rgba(0, 0, 0, 0.1);
+	border-radius: 50px;
+	box-shadow: 0 1px 7px 1px rgba(0, 0, 0, 0.2);
+	padding: 10px 20px;
+	transition: all 0.3s;
+	user-select: none;
+	&:hover {
+		background: rgba(0, 0, 0, 0.05);
+		cursor: pointer;
+	}
+}
