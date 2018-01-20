@@ -19,6 +19,7 @@ module.exports = {
 	entry: {
 		app: './src/main.js'
 	},
+	target: 'electron-renderer',
 	output: {
 		path: path.resolve(__dirname, '../dist'),
 		publicPath: config[env.prod ? 'build' : 'dev'].publicPath,
@@ -34,7 +35,9 @@ module.exports = {
 		alias: config.aliases
 	},
 	module: {
-		rules: [{ // eslint
+		rules: [
+			/*
+			{ // eslint
 				enforce: 'pre',
 				test: /\.(vue|js)$/,
 				loader: 'eslint-loader',
@@ -43,7 +46,7 @@ module.exports = {
 				options: {
 					formatter: require('eslint-friendly-formatter')
 				}
-			},
+			}, */
 			{
 				test: /\.js$/,
 				loader: 'babel-loader',
