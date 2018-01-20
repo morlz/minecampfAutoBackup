@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs-extra'
 
 const state = {
 	filename: 'settings.json',
@@ -26,15 +26,16 @@ const actions = {
 		if (!fs.existsSync(state.filename)) {
 			fs.writeFileSync(state.filename, JSON.stringify(state.settings))
 		} else {
-			fs.readFile(state.filename, { encoding: 'utf8' }, (err, data) => {
-				if (err) dispatch('notify', 'Ошибка чтения файла настроек')
+			fs.readFile(state.filename, { encoding: 'utf8' })
+			.then(data => {
 				try {
 					commit('settings_set', JSON.parse(data))
 					commit('settings_statusUpdate')
 				} catch (err) {
-					dispatch('notify', 'Ошибка чтения файла настроек, невалидный json')
+					dispatch('alert', 'Ошибка чтения файла настроек, невалидный json')
 				}
 			})
+			.catch(err => dispatch('alert', 'Ошибка чтения файла настроек'))
 		}
 	},
 	settings_set ({ commit, dispatch, state }, payload) {
@@ -45,9 +46,8 @@ const actions = {
 		commit('settings_set', payload)
 		commit('settings_statusUpdate')
 
-		fs.writeFile(state.filename, JSON.stringify(payload), { encoding: 'utf8' }, err => {
-			if (err) dispatch('notify', { message: 'Ошибка записи файла настроек' })
-		})
+		fs.writeFile(state.filename, JSON.stringify(payload), { encoding: 'utf8' })
+		.catch(err => dispatch('alert', 'Ошибка записи файла настроек'))
 	}
 }
 
@@ -70,11 +70,13 @@ const mutations = {
 				} else {
 					state.exist[prop] = fs.existsSync(state.settings.path[prop])
 				}
-	}
+	},
+	settings_lastBackupSet: (state, payload) => state.settings.timing.last = payload
 }
 
 const getters = {
 	settings: state => state.settings,
+	settings_status: state => state.exist,
 	settings_status_to: state => state.exist.to ? `Существует` : state.settings.path.to.length ? `Не существует` : `Не задано`,
 	settings_status_from: state => state.exist.from ? `Существует` : state.settings.path.from.length ? `Не существует` : `Не задано`,
 	settings_status_exec: state => state.exist.exec ? `Существует` : state.settings.path.exec.length ? `Не существует` : `Не задано`,

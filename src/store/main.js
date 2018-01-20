@@ -1,5 +1,6 @@
 import {
-	Alert
+	Alert,
+	Toast
 } from 'quasar'
 
 
@@ -8,11 +9,19 @@ const state = {
 }
 
 const actions = {
-	notify({
+	alert({
 		commit,
 		dispatch
 	}, payload) {
 		Alert.create({
+			html: payload,
+		})
+	},
+	notify({
+		commit,
+		dispatch
+	}, payload) {
+		Toast.create({
 			html: payload,
 		})
 	}

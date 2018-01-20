@@ -1,5 +1,6 @@
 const state = {
-	run: false
+	run: false,
+	timer: false
 }
 
 const actions = {

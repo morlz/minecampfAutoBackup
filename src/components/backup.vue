@@ -21,7 +21,7 @@
 			</q-field>
 
 			<q-field icon="update">
-				<q-input v-model="local.settings.timing.last" float-label="Следующий бекап" />
+				<q-input v-model="local.settings.timing.last" float-label="Следующий бекап" readonly />
 			</q-field>
 
 			<q-field icon="visibility">
