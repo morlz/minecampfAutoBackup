@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 const state = {
-
+	list: []
 }
 
 const actions = {
@@ -25,15 +25,22 @@ const actions = {
 			dispatch('notify', `Создан бекап: ${worldName}`)
 		})
 		.catch(err => dispatch('alert', `Ошибка копирования ${err}`))
+	},
+	backup_update({ commit, dispatch, getters }) {
+		if (!getters.settings_status.to) return
+
+		fs.readdir(getters.settings.path.to)
+			.then(data => commit('backup_listSet', data))
+			.catch(err => dispatch('alert', err))
 	}
 }
 
 const mutations = {
-
+	backup_listSet: (state, payload) => state.list = payload
 }
 
 const getters = {
-
+	backup_list: state => state.list
 }
 
 export default {

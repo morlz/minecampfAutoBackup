@@ -104,7 +104,8 @@ export default {
 			'server_down',
 			'timer_start',
 			'timer_stop',
-			'backup_now'
+			'backup_now',
+			'backup_update'
 		]),
 		saveSettings () {
 			this.settings_set(this.local.settings)
@@ -112,6 +113,7 @@ export default {
 	},
 	mounted() {
 		this.settings_get()
+		setTimeout(() => { this.backup_update() }, 1e3)
 	}
 }
 </script>
