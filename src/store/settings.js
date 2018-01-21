@@ -23,6 +23,7 @@ const state = {
 
 const actions = {
 	settings_get ({ commit, dispatch, state }) {
+		console.log('ge');
 		if (!fs.existsSync(state.filename)) {
 			fs.writeFileSync(state.filename, JSON.stringify(state.settings))
 		} else {
@@ -39,6 +40,10 @@ const actions = {
 		}
 	},
 	settings_set ({ commit, dispatch, state }, payload) {
+		console.log('se');
+		if (payload == undefined)
+			payload = state.settings
+
 		for (var prop in payload.path)
 			if (payload.path.hasOwnProperty(prop))
 				payload.path[prop] = payload.path[prop].split('\\').join('/')
@@ -65,11 +70,7 @@ const mutations = {
 	settings_statusUpdate: state => {
 		for (var prop in state.settings.path)
 			if (state.settings.path.hasOwnProperty(prop))
-				if (state.settings.path[prop].length == 0) {
-					state.exist[prop] = false
-				} else {
-					state.exist[prop] = fs.existsSync(state.settings.path[prop])
-				}
+				state.exist[prop] = state.settings.path[prop].length != 0 ? fs.existsSync(state.settings.path[prop]) : false
 	},
 	settings_lastBackupSet: (state, payload) => state.settings.timing.last = payload
 }

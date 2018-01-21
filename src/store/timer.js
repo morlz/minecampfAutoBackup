@@ -1,19 +1,13 @@
 const state = {
-	run: false,
-	timer: false
+	run: false
 }
 
-const actions = {
-	timer_start () {
-
-	},
-	timer_stop () {
-
-	}
-}
+const actions = {}
 
 const mutations = {
-	timer_runSet: (state, payload) => state.run = payload
+	timer_runSet: (state, payload) => state.run = payload,
+	timer_start: state => state.run = true,
+	timer_stop: state => state.run = false,
 }
 
 const getters = {

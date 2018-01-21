@@ -54,10 +54,12 @@ export default {
 		])
 	},
 	methods: {
-
+		...mapActions([
+			'backup_update'
+		])
 	},
 	mounted() {
-
+		this.backup_update()
 	}
 }
 </script>

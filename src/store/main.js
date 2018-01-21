@@ -5,10 +5,19 @@ import {
 
 
 const state = {
-
+	now: Date.now()
 }
 
 const actions = {
+	app_init({ commit, dispatch }){
+		dispatch('settings_get')
+		dispatch('backup_update')
+		setInterval(() => dispatch('app_engine'), 1e3)
+	},
+	app_engine ({ commit, dispatch }) {
+		dispatch('backup_check')
+		commit('app_updateNow')
+	},
 	alert({
 		commit,
 		dispatch
@@ -28,11 +37,11 @@ const actions = {
 }
 
 const mutations = {
-
+	app_updateNow: state => state.now = Date.now()
 }
 
 const getters = {
-
+	app_now: state => state.now
 }
 
 export default {

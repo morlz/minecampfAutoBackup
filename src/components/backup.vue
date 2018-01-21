@@ -21,7 +21,7 @@
 			</q-field>
 
 			<q-field icon="update">
-				<q-input v-model="local.settings.timing.last" float-label="Следующий бекап" readonly />
+				<q-input :value="local_backup_next" float-label="Следующий бекап" readonly />
 			</q-field>
 
 			<q-field icon="visibility">
@@ -67,10 +67,10 @@ export default {
 						exec: ''
 					},
 					timing: {
-						interval: "0",
+						interval: "1",
 						last: "",
 					},
-					index: "0"
+					index: "1"
 				}
 			}
 		}
@@ -78,6 +78,18 @@ export default {
 	watch: {
 		settings (n) {
 			this.local.settings = n
+		},
+		'local.settings.timing.interval' (n) {
+			if (isNaN(+n)) this.local.settings.timing.interval = "1"
+			if (+n < 1) this.local.settings.timing.interval = "1"
+			if (n != this.local.settings.timing.interval)
+				this.saveSettings()
+		},
+		'local.settings.index' (n) {
+			if (isNaN(+n)) this.local.settings.index = "1"
+			if (+n < 1) this.local.settings.index = "1"
+			if (n != this.local.settings.index)
+				this.saveSettings()
 		}
 	},
 	computed: {
@@ -87,33 +99,39 @@ export default {
 			'timer_run',
 			'settings_status_to',
 			'settings_status_from',
-			'settings_status_exec'
+			'settings_status_exec',
+			'app_now'
 		]),
 		toggleBackupButtonName () {
-			return this.rimter_run ? `Остановить таймер` : `Запустить таймер`
+			return this.timer_run ? `Остановить таймер` : `Запустить таймер`
 		},
 		toggleServerButtonName () {
 			return this.server_run ? `Остановить сервер` : `Запустить сервер`
+		},
+		local_backup_nextIn () {
+			return this.settings.timing.interval - (this.app_now - this.settings.timing.last) / 1e3
+		},
+		local_backup_next () {
+			return this.local_backup_nextIn > 0 ? this.local_backup_nextIn.toFixed() : `Сейчас`
 		}
 	},
 	methods: {
 		...mapActions([
 			'settings_set',
-			'settings_get',
 			'server_up',
 			'server_down',
+			'backup_now',
+		]),
+		...mapMutations([
 			'timer_start',
 			'timer_stop',
-			'backup_now',
-			'backup_update'
 		]),
 		saveSettings () {
 			this.settings_set(this.local.settings)
 		}
 	},
 	mounted() {
-		this.settings_get()
-		setTimeout(() => { this.backup_update() }, 1e3)
+		this.local.settings = this.settings
 	}
 }
 </script>
