@@ -52,11 +52,38 @@ const actions = {
 		watcher.on('change', (e, data) => dispatch('backup_updateList'))
 		commit('backup_fsWatcherSet', watcher)
 	},
-	backup_unWatch({ commit, dispatch }) {
+	backup_unWatch({ commit, dispatch, getters }) {
 		if (getters.backup_fsWatcher)
-			backup_fsWatcher.close()
+			getters.backup_fsWatcher.close()
 
 		commit('backup_fsWatcherSet', false)
+	},
+	backup_restore({ commit, dispatch, getters }, payload) {
+		const removeIfExist = oldPath => {
+			if (fs.existsSync(oldPath))
+				return fs.rmdir(oldPath)
+			else
+				return new Promise(resolve => resolve())
+		}
+
+
+		let backupPath = getters.settings.path.to.split('/')
+		backupPath.push(payload)
+		backupPath = backupPath.join('/')
+
+		if (!fs.existsSync(backupPath))
+			return dispatch('alert', 'Указаный бекап не существует')
+
+		if (!fs.existsSync(getters.settings.path.from))
+			return dispatch('alert', 'Указаный бекап не существует')
+
+		let oldPath = getters.settings.path.from + '_old'
+
+		removeIfExist(oldPath)
+			.then(() => fs.rename(getters.settings.path.from, oldPath))
+			.then(() => fs.copy(backupPath, getters.settings.path.from))
+			.then(() => dispatch('notify', 'Бекап востановлен'))
+			.catch(err => dispatch('alert', err))
 	}
 }
 

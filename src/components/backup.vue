@@ -82,13 +82,13 @@ export default {
 		'local.settings.timing.interval' (n) {
 			if (isNaN(+n)) this.local.settings.timing.interval = "1"
 			if (+n < 1) this.local.settings.timing.interval = "1"
-			if (n != this.local.settings.timing.interval)
+			if (n != this.local.settings.timing.interval && n)
 				this.saveSettings()
 		},
 		'local.settings.index' (n) {
 			if (isNaN(+n)) this.local.settings.index = "1"
 			if (+n < 1) this.local.settings.index = "1"
-			if (n != this.local.settings.index)
+			if (n != this.local.settings.index && n)
 				this.saveSettings()
 		}
 	},

@@ -1,4 +1,5 @@
 import fs from 'fs-extra'
+import path from 'path'
 
 const state = {
 	filename: 'settings.json',
@@ -23,20 +24,23 @@ const state = {
 
 const actions = {
 	settings_get ({ commit, dispatch, state }) {
-		if (!fs.existsSync(state.filename)) {
-			fs.writeFileSync(state.filename, JSON.stringify(state.settings))
+		let configFilePath = path.resolve('./', state.filename)
+
+		if (!fs.existsSync(configFilePath)) {
+			fs.writeFileSync(configFilePath, JSON.stringify(state.settings))
 		} else {
-			fs.readFile(state.filename, { encoding: 'utf8' })
+			fs.readFile(configFilePath, { encoding: 'utf8' })
 			.then(data => {
 				try {
+					if (!data) throw new Error('Файл пуст')
 					commit('settings_set', JSON.parse(data))
 					commit('settings_statusUpdate')
 				} catch (err) {
 					dispatch('alert', `Ошибка чтения файла настроек, невалидный json ${err}`)
-					fs.writeFileSync(state.filename, JSON.stringify(state.settings))
+					fs.writeFileSync(configFilePath, JSON.stringify(state.settings))
 				}
 			})
-			.catch(err => dispatch('alert', 'Ошибка чтения файла настроек'))
+			.catch(err => dispatch('alert', `Ошибка чтения файла настроек ${err}`))
 		}
 	},
 	settings_set ({ commit, dispatch, state }, payload) {

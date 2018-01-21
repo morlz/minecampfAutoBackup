@@ -2,7 +2,7 @@
 <div class="restoreWrapper">
 	<q-list class="list">
 		<q-collapsible v-for="day, index in backup_list" :key="index" :label="`${day.date} (${day.items.length})`">
-			<q-item v-for="backup, backupIndex in day.items" :key="backupIndex">
+			<q-item v-for="backup, backupIndex in day.items" :key="backupIndex" class="item">
 				<q-item-side>
 					{{ backup.index }}
 				</q-item-side>
@@ -12,6 +12,9 @@
 						{{ backup.time }}
 					</q-item-tile>
 				</q-item-main>
+				<q-item-side class="buttons">
+					<q-btn color="primary" class="button" @click="backup_restore(backup.name)">Востановить</q-btn>
+				</q-item-side>
 			</q-item>
 		</q-collapsible>
 	</q-list>
@@ -30,7 +33,8 @@ import {
 	QItemTile,
 	QItemMain,
 	QItemSeparator,
-	QCollapsible
+	QCollapsible,
+	QBtn
 } from 'quasar'
 
 export default {
@@ -42,7 +46,8 @@ export default {
 		QItemTile,
 		QItemMain,
 		QItemSeparator,
-		QCollapsible
+		QCollapsible,
+		QBtn
 	},
 	watch: {
 		'settings.path.to' (n) {
@@ -58,7 +63,9 @@ export default {
 	methods: {
 		...mapActions([
 			'backup_updateList',
-			'backup_watch'
+			'backup_watch',
+			'backup_unWatch',
+			'backup_restore'
 		])
 	},
 	mounted() {
@@ -66,18 +73,35 @@ export default {
 		this.backup_watch()
 	},
 	beforeDestroy() {
-
+		this.backup_unWatch()
 	}
 }
 </script>
 
 <style lang="less">
 	.restoreWrapper {
+		.item {
+			transition: all 0.3s ease-in-out;
+			.button {
+				opacity: 0;
+				transition: all 0.3s ease-in-out;
+			}
+			&:hover {
+				background: hsla(0,0%,74%,.4);
+				.button {
+					opacity: 1;
+				}
+			}
+		}
 		.description {
 			display: grid;
 			grid-auto-flow: row;
 			justify-content: start;
 			grid-template-columns: 50px 1fr;
 		}
+	}
+
+	.q-collapsible {
+		transition: all 0.3s ease-in-out;
 	}
 </style>
