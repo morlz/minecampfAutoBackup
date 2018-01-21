@@ -1,8 +1,12 @@
 import fs from 'fs-extra'
 import path from 'path'
+import dateFormat from 'dateformat'
+import sortFnFactory from '@/lib/sortFnFactory'
+
 
 const state = {
-	list: []
+	list: [],
+	fsWatcher: false
 }
 
 const actions = {
@@ -28,7 +32,7 @@ const actions = {
 		})
 		.catch(err => dispatch('alert', `Ошибка копирования ${err}`))
 	},
-	backup_update({ commit, dispatch, getters }) {
+	backup_updateList({ commit, dispatch, getters }) {
 		commit('settings_statusUpdate')
 		if (!getters.settings_status_to || !getters.settings.path.to) return
 
@@ -40,15 +44,59 @@ const actions = {
 		if (getters.settings.timing.interval - (getters.app_now - getters.settings.timing.last) / 1e3 > 0) return
 		if (!getters.timer_run) return
 		dispatch('backup_now')
+	},
+	backup_watch({ commit, dispatch, getters }) {
+		if (!getters.settings_status.to) return
+
+		let watcher = fs.watch(getters.settings.path.to)
+		watcher.on('change', (e, data) => dispatch('backup_updateList'))
+		commit('backup_fsWatcherSet', watcher)
+	},
+	backup_unWatch({ commit, dispatch }) {
+		if (getters.backup_fsWatcher)
+			backup_fsWatcher.close()
+
+		commit('backup_fsWatcherSet', false)
 	}
 }
 
 const mutations = {
 	backup_listSet: (state, payload) => state.list = payload,
+	backup_fsWatcherSet: (state, payload) => state.fsWatcher = payload
 }
 
 const getters = {
-	backup_list: state => state.list
+	backup_list: state => {
+		let list = []
+
+		state.list.map(el => {
+			let splited = el.split('_'),
+				datetime = new Date()
+
+			datetime.setTime(splited[2])
+
+			let time = dateFormat(datetime, "HH:MM:ss"),
+				date = dateFormat(datetime, "yyyy-mm-dd")
+
+			if (!list.find(item => item.date == date))
+				list.push({ date, items: [] })
+
+			list.find(item => item.date == date).items.unshift({
+				name: el,
+				index: splited[1],
+				time,
+				timestamp: +splited[2]
+			})
+		})
+
+		return list.map(day => {
+			return {
+				date: day.date,
+				items: day.items.sort(sortFnFactory('timestamp'))
+			}
+		}).sort(sortFnFactory('date'))
+	},
+	backup_fsWatcher: state => state.fsWatcher
 }
 
 export default {

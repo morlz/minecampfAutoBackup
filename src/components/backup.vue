@@ -21,7 +21,7 @@
 			</q-field>
 
 			<q-field icon="update">
-				<q-input :value="local_backup_next" float-label="Следующий бекап" readonly />
+				<q-input :value="local_backup_next" float-label="Следующий бекап" readonly suffix="сек" />
 			</q-field>
 
 			<q-field icon="visibility">

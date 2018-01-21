@@ -23,7 +23,6 @@ const state = {
 
 const actions = {
 	settings_get ({ commit, dispatch, state }) {
-		console.log('ge');
 		if (!fs.existsSync(state.filename)) {
 			fs.writeFileSync(state.filename, JSON.stringify(state.settings))
 		} else {
@@ -33,14 +32,14 @@ const actions = {
 					commit('settings_set', JSON.parse(data))
 					commit('settings_statusUpdate')
 				} catch (err) {
-					dispatch('alert', 'Ошибка чтения файла настроек, невалидный json')
+					dispatch('alert', `Ошибка чтения файла настроек, невалидный json ${err}`)
+					fs.writeFileSync(state.filename, JSON.stringify(state.settings))
 				}
 			})
 			.catch(err => dispatch('alert', 'Ошибка чтения файла настроек'))
 		}
 	},
 	settings_set ({ commit, dispatch, state }, payload) {
-		console.log('se');
 		if (payload == undefined)
 			payload = state.settings
 

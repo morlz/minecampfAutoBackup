@@ -11,7 +11,7 @@ const state = {
 const actions = {
 	app_init({ commit, dispatch }){
 		dispatch('settings_get')
-		dispatch('backup_update')
+		dispatch('backup_updateList')
 		setInterval(() => dispatch('app_engine'), 1e3)
 	},
 	app_engine ({ commit, dispatch }) {
