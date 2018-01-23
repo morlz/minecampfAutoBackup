@@ -10,7 +10,7 @@ const state = {
 }
 
 const actions = {
-	backup_now ({ commit, dispatch, getters }) {
+	async backup_now ({ commit, dispatch, getters }) {
 		commit('settings_statusUpdate')
 
 		if (!getters.settings_status.from)
@@ -21,16 +21,18 @@ const actions = {
 
 		let index = isNaN(+getters.settings.index) ? "0" : (+getters.settings.index + 1) + "",
 			worldName = `world_${index}_${Date.now()}`,
-			backupPath = path.join(getters.settings.path.to, worldName)
+			backupPath = path.join(getters.settings.path.to, worldName),
+			settings = { ...getters.settings, index }
 
-		fs.copy(getters.settings.path.from, backupPath)
-		.then(e => {
-			let settings = { ...getters.settings, index }
-			settings.timing.last = Date.now()
-			dispatch('settings_set', settings)
+		settings.timing.last = Date.now()
+		dispatch('settings_set', settings)
+
+		try {
+			await fs.copy(getters.settings.path.from, backupPath)
 			dispatch('notify', `Создан бекап: ${worldName}`)
-		})
-		.catch(err => dispatch('alert', `Ошибка копирования ${err}`))
+		} catch (err) {
+			dispatch('alert', `Ошибка копирования ${err}`)
+		}
 	},
 	backup_updateList({ commit, dispatch, getters }) {
 		commit('settings_statusUpdate')
@@ -58,15 +60,7 @@ const actions = {
 
 		commit('backup_fsWatcherSet', false)
 	},
-	backup_restore({ commit, dispatch, getters }, payload) {
-		const removeIfExist = oldPath => {
-			if (fs.existsSync(oldPath))
-				return fs.rmdir(oldPath)
-			else
-				return new Promise(resolve => resolve())
-		}
-
-
+	async backup_restore({ commit, dispatch, getters }, payload) {
 		let backupPath = getters.settings.path.to.split('/')
 		backupPath.push(payload)
 		backupPath = backupPath.join('/')
@@ -79,11 +73,16 @@ const actions = {
 
 		let oldPath = getters.settings.path.from + '_old'
 
-		removeIfExist(oldPath)
-			.then(() => fs.rename(getters.settings.path.from, oldPath))
-			.then(() => fs.copy(backupPath, getters.settings.path.from))
-			.then(() => dispatch('notify', 'Бекап востановлен'))
-			.catch(err => dispatch('alert', err))
+		try {
+			if (fs.existsSync(oldPath))
+				return await fs.remove(oldPath)
+
+			await fs.rename(getters.settings.path.from, oldPath)
+			await fs.copy(backupPath, getters.settings.path.from)
+			dispatch('notify', 'Бекап востановлен')
+		} catch (err) {
+			dispatch('alert', err)
+		}
 	}
 }
 
@@ -98,12 +97,20 @@ const getters = {
 
 		state.list.map(el => {
 			let splited = el.split('_'),
-				datetime = new Date()
+				datetime = new Date(),
+				time,
+				date
 
-			datetime.setTime(splited[2])
+			if (splited.length != 3) return
 
-			let time = dateFormat(datetime, "HH:MM:ss"),
+			try {
+				datetime.setTime(splited[2])
+				time = dateFormat(datetime, "HH:MM:ss")
 				date = dateFormat(datetime, "yyyy-mm-dd")
+			} catch (err) {
+				time = '...'
+				date = '...'
+			}
 
 			if (!list.find(item => item.date == date))
 				list.push({ date, items: [] })

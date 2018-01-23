@@ -18,7 +18,9 @@ function createWindow() {
 	 */
 	mainWindow = new BrowserWindow({
 		title: config.name,
-		width: 765,
+
+		width: 1600,
+		//width: 765,
 		height: 560,
 		show: false,
 		center: true,
@@ -28,6 +30,7 @@ function createWindow() {
 
 	mainWindow.once('ready-to-show', () => {
 		mainWindow.show()
+		mainWindow.webContents.openDevTools()
 	})
 
 	mainWindow.loadURL(
