@@ -75,7 +75,7 @@ const actions = {
 
 		try {
 			if (fs.existsSync(oldPath))
-				return await fs.remove(oldPath)
+				await fs.remove(oldPath)
 
 			await fs.rename(getters.settings.path.from, oldPath)
 			await fs.copy(backupPath, getters.settings.path.from)
