@@ -1,8 +1,8 @@
 {
-	"name": "quasar-electron-app",
-	"productName": "Quasar Electron App",
-	"version": "0.0.1",
-	"author": "Your name <your@email.com>",
+	"name": "minecampfAutoBackupv2",
+	"productName": "Minecampf Auto Backup v2.0",
+	"version": "2.0.0",
+	"author": "Arkady <morlz@mail.ru>",
 	"description": "Quasar App wrapped with Electron",
 	"main": "electron.js",
 	"scripts": {

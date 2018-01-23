@@ -1,7 +1,11 @@
 <template>
 <div class="restoreWrapper">
-	<q-list class="list">
-		<q-collapsible v-for="day, index in backup_list" :key="index" :label="`${day.date} (${day.items.length})`">
+	<div class="noFoldrerMsg" v-if="settings_showNoRestoreMessage">
+		{{ settings_showNoRestoreMessage }}
+	</div>
+
+	<q-list class="list" v-if="!settings_showNoRestoreMessage">
+		<q-collapsible v-for="day, index in backup_list" :key="index" :label="`${day.date} (${day.items.length})`" >
 			<q-item v-for="backup, backupIndex in day.items" :key="backupIndex" class="item">
 				<q-item-side>
 					{{ backup.index }}
@@ -57,7 +61,8 @@ export default {
 	computed: {
 		...mapGetters([
 			'backup_list',
-			'settings'
+			'settings',
+			'settings_showNoRestoreMessage'
 		])
 	},
 	methods: {
@@ -101,7 +106,7 @@ export default {
 		}
 	}
 
-	.q-collapsible {
+	.q-item {
 		transition: all 0.3s ease-in-out;
 	}
 </style>

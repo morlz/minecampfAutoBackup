@@ -73,6 +73,22 @@ export default {
 </script>
 
 <style lang="less">
+*::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background-color: #F5F5F5;
+}
+*::-webkit-scrollbar {
+    width: 12px;
+	height: 12px;
+    background-color: #F5F5F5;
+}
+*::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: #027be3;
+}
+
+
 body,
 html {
 	height: 100%;
@@ -86,7 +102,9 @@ html {
 	align-content: start;
 
 	.mainWrapper {
-		overflow-y: scroll;
+		margin: 10px;
+		padding-right: 10px;
+		overflow-y: auto;
 	}
 }
 </style>

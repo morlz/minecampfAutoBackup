@@ -18,9 +18,16 @@ function createWindow() {
 	 */
 	mainWindow = new BrowserWindow({
 		title: config.name,
-		width: 800,
-		height: 600,
+		width: 765,
+		height: 560,
+		show: false,
+		center: true,
+		resizable: process.env.NODE_ENV === 'development',
 		icon: path.join(__dirname, '../icons/icon.png')
+	})
+
+	mainWindow.once('ready-to-show', () => {
+		mainWindow.show()
 	})
 
 	mainWindow.loadURL(

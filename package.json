@@ -1,7 +1,7 @@
 {
 	"name": "minecampfAutoBackup",
 	"productName": "Auto backup for minecampf",
-	"version": "0.0.1",
+	"version": "2.0.0",
 	"private": true,
 	"description": "...",
 	"author": "Arkady <morlz@mail.ru>",

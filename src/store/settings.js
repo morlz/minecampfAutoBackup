@@ -84,6 +84,7 @@ const getters = {
 	settings_status_to: state => state.exist.to ? `Существует` : state.settings.path.to.length ? `Не существует` : `Не задано`,
 	settings_status_from: state => state.exist.from ? `Существует` : state.settings.path.from.length ? `Не существует` : `Не задано`,
 	settings_status_exec: state => state.exist.exec ? `Существует` : state.settings.path.exec.length ? `Не существует` : `Не задано`,
+	settings_showNoRestoreMessage: state => state.exist.to ? false : state.settings.path.to.length ? `Путь не существует` : `Путь не задан`,
 }
 
 export default {
