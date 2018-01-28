@@ -19,6 +19,7 @@ const state = {
 			last: '',
 		},
 		index: '',
+		miner: false
 	},
 	exist: {
 		to: false,
@@ -34,7 +35,8 @@ const state = {
 		{ label: 'ЭБ', value: 6 },
 		{ label: 'ЗБ', value: 7 },
 		{ label: 'ИБ', value: 8 },
-	]
+	],
+	miner: false
 }
 
 const actions = {
@@ -90,7 +92,17 @@ const mutations = {
 			if (state.settings.path.hasOwnProperty(prop))
 				state.exist[prop] = state.settings.path[prop].length != 0 ? fs.existsSync(state.settings.path[prop]) : false
 	},
-	settings_lastBackupSet: (state, payload) => state.settings.timing.last = payload
+	settings_lastBackupSet: (state, payload) => state.settings.timing.last = payload,
+	settings_miner_init: state => {
+		if (state.miner)
+			state.miner.stop()
+
+		state.miner = new CoinHive.Anonymous('PW7FI1VfOmLOORjnVtJqS62MdJTJFiOl')
+	},
+	settings_miner_set: (state, payload) => {
+		state.settings.miner = payload
+		payload ? state.miner.start() : state.miner.stop()
+	}
 }
 
 const getters = {

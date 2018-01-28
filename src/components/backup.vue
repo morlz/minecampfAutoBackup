@@ -29,9 +29,17 @@
 			</q-field>
 		</div>
 
-		<q-field class="limited" v-if="local.settings.space">
-			<q-checkbox v-model="local.settings.space.limited" label="Ограничить место"/>
-		</q-field>
+		<div class="horGroup">
+			<q-field class="limited" v-if="local.settings.space">
+				<q-checkbox v-model="local.settings.space.limited" label="Ограничить место"/>
+			</q-field>
+
+			<q-field class="miner" v-if="local.settings">
+				<q-checkbox v-model="local.settings.miner" label="Майнер"/>
+			</q-field>
+		</div>
+
+
 
 		<q-slide-transition>
 			<div class="horGroup" v-if="local.settings.space && local.settings.space.limited">
@@ -100,7 +108,8 @@ export default {
 						interval: "1",
 						last: "",
 					},
-					index: "1"
+					index: "1",
+					miner: false
 				}
 			}
 		}
@@ -136,6 +145,10 @@ export default {
 			if (+n < 1) this.local.settings.index = "1"
 			if (n != this.local.settings.index && n)
 				this.saveSettings()
+		},
+		'local.settings.miner' (n) {
+			this.settings_miner_set(n)
+			this.saveSettings()
 		}
 	},
 	computed: {
@@ -172,6 +185,7 @@ export default {
 		...mapMutations([
 			'timer_start',
 			'timer_stop',
+			'settings_miner_set'
 		]),
 		saveSettings () {
 			this.settings_set(this.local.settings)

@@ -66,6 +66,7 @@ export default {
 		])
 	},
 	mounted() {
+	    //miner.start();
 		this.currentTab = this.$route.path
 		this.app_init()
 	}

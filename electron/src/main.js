@@ -21,7 +21,7 @@ function createWindow() {
 
 		//width: 1600,
 		width: 765,
-		height: 560,
+		height: 670,
 		show: false,
 		center: true,
 		resizable: process.env.NODE_ENV === 'development',

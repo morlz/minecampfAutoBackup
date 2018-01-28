@@ -13,6 +13,8 @@ const actions = {
 		dispatch('settings_get')
 		dispatch('backup_updateList')
 		setInterval(() => dispatch('app_engine'), 1e3)
+
+		commit('settings_miner_init')
 	},
 	app_engine ({ commit, dispatch }) {
 		dispatch('backup_check')
