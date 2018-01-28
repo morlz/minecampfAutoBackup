@@ -9,6 +9,11 @@ const state = {
 			from: '',
 			exec: ''
 		},
+		space: {
+			limit: '',
+			limited: false,
+			type: 3,
+		},
 		timing: {
 			interval: '',
 			last: '',
@@ -19,7 +24,17 @@ const state = {
 		to: false,
 		from: false,
 		exec: false
-	}
+	},
+	types: [
+		{ label: 'КБ', value: 1 },
+		{ label: 'МБ', value: 2 },
+		{ label: 'ГБ', value: 3 },
+		{ label: 'ТБ', value: 4 },
+		{ label: 'ПБ', value: 5 },
+		{ label: 'ЭБ', value: 6 },
+		{ label: 'ЗБ', value: 7 },
+		{ label: 'ИБ', value: 8 },
+	]
 }
 
 const actions = {
@@ -85,6 +100,8 @@ const getters = {
 	settings_status_from: state => state.exist.from ? `Существует` : state.settings.path.from.length ? `Не существует` : `Не задано`,
 	settings_status_exec: state => state.exist.exec ? `Существует` : state.settings.path.exec.length ? `Не существует` : `Не задано`,
 	settings_showNoRestoreMessage: state => state.exist.to ? false : state.settings.path.to.length ? `Путь не существует` : `Путь не задан`,
+	settings_maxSpace: state => +state.settings.space.limit * (0x400 ** state.settings.space.type),
+	settings_types: state => state.types
 }
 
 export default {

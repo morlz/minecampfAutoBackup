@@ -2,7 +2,9 @@ import fs from 'fs-extra'
 import path from 'path'
 import dateFormat from 'dateformat'
 import sortFnFactory from '@/lib/sortFnFactory'
+import folderSize from 'get-folder-size'
 
+fs.size = (...args) => new Promise((resolve, reject) => folderSize(...args, (err, size) => err ? reject(err) : resolve(size)))
 
 const state = {
 	list: [],
@@ -27,6 +29,20 @@ const actions = {
 		settings.timing.last = Date.now()
 		dispatch('settings_set', settings)
 
+		await dispatch('backup_updateList')
+
+		try {
+			let [sizeFrom, sizeTo] = await Promise.all([
+				fs.size(getters.settings.path.from),
+				fs.size(getters.settings.path.to)
+			])
+
+			if (sizeFrom + sizeTo > getters.settings_maxSpace)
+				await dispatch('backup_createSpace', sizeFrom + sizeTo - getters.settings_maxSpace)
+		} catch (err) {
+			dispatch('alert', `Ошибка управления местом ${err}`)
+		}
+
 		try {
 			await fs.copy(getters.settings.path.from, backupPath)
 			dispatch('notify', `Создан бекап: ${worldName}`)
@@ -34,13 +50,61 @@ const actions = {
 			dispatch('alert', `Ошибка копирования ${err}`)
 		}
 	},
-	backup_updateList({ commit, dispatch, getters }) {
+	async backup_createSpace({ commit, dispatch, getters }, payload){
+		let curSize = await fs.size(getters.settings.path.to),
+			needSpace = curSize - payload
+
+		try {
+			while (curSize > needSpace) {
+				await dispatch('backup_removeLast')
+				curSize = await fs.size(getters.settings.path.to)
+			}
+		} catch (err) {
+			dispatch('alert', `Ошибка создания свободного места ${err}`)
+		}
+	},
+	async backup_removeLast({ commit, dispatch, getters }){
+		let daysBiggerThatOne = getters.backup_list.filter(el => el.items.length > 1 && el.date != dateFormat(new Date(), "yyyy-mm-dd"))
+
+		if (daysBiggerThatOne.length)
+			return await dispatch('backup_remove', daysBiggerThatOne.pop().items.pop())
+
+		let daysNotNow = getters.backup_list.filter(el => el.date != dateFormat(new Date(), "yyyy-mm-dd"))
+
+		if (daysNotNow.length)
+			return await dispatch('backup_remove', daysNotNow.pop().items.pop())
+
+		let now = getters.backup_list.filter(el => el.date == dateFormat(new Date(), "yyyy-mm-dd") && el.items)[0]
+
+		if (now && now.items.length)
+			return await dispatch('backup_remove', now.items.pop())
+
+		throw new Error('Больше нет бекапов')
+	},
+	async backup_remove({ commit, dispatch, getters }, payload){
+		if (!payload || !payload.name)
+			return dispatch('alert', '[backup_remove] invalid params')
+
+		try {
+			await fs.remove(getters.settings.path.to + '/' + payload.name)
+			dispatch('notify', `Бекап ${payload.name} удалён. Освобождено ${payload.size} Б.`)
+		} catch (err) {
+			dispatch('alert', err)
+		}
+
+		await dispatch('backup_updateList')
+	},
+	async backup_updateList({ commit, dispatch, getters }) {
 		commit('settings_statusUpdate')
 		if (!getters.settings_status_to || !getters.settings.path.to) return
 
-		fs.readdir(getters.settings.path.to)
-			.then(data => commit('backup_listSet', data))
-			.catch(err => dispatch('alert', err))
+		try {
+			let list = await fs.readdir(getters.settings.path.to)
+			let sizes = await Promise.all( list.reduce((promises, el) => [ promises.push( fs.size( getters.settings.path.to + '/' + el ) ), promises ][1], []) )
+			commit('backup_listSet', list.map( (el, index) => ({ name: el, size: sizes[index] }) ))
+		} catch (err) {
+			dispatch('alert', err)
+		}
 	},
 	backup_check({ commit, dispatch, getters }){
 		if (getters.settings.timing.interval - (getters.app_now - getters.settings.timing.last) / 1e3 > 0) return
@@ -96,7 +160,7 @@ const getters = {
 		let list = []
 
 		state.list.map(el => {
-			let splited = el.split('_'),
+			let splited = el.name.split('_'),
 				datetime = new Date(),
 				time,
 				date
@@ -116,7 +180,8 @@ const getters = {
 				list.push({ date, items: [] })
 
 			list.find(item => item.date == date).items.unshift({
-				name: el,
+				name: el.name,
+				size: el.size,
 				index: splited[1],
 				time,
 				timestamp: +splited[2]

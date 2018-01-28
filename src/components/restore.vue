@@ -14,6 +14,7 @@
 					<q-item-tile label>{{ backup.name }}</q-item-tile>
 					<q-item-tile sublabel>
 						{{ backup.time }}
+						{{ sizeFormat(backup.size) }}
 					</q-item-tile>
 				</q-item-main>
 				<q-item-side class="buttons">
@@ -62,7 +63,8 @@ export default {
 		...mapGetters([
 			'backup_list',
 			'settings',
-			'settings_showNoRestoreMessage'
+			'settings_showNoRestoreMessage',
+			'settings_types',
 		])
 	},
 	methods: {
@@ -71,7 +73,17 @@ export default {
 			'backup_watch',
 			'backup_unWatch',
 			'backup_restore'
-		])
+		]),
+		sizeFormat (size) {
+			let tmp = size,
+				exp = 0
+			for (; 0x400 < tmp; exp++)
+				tmp /= 0x400
+
+			let type = this.settings_types.find(el => el.value == exp) || {}
+			size = (size + "").split('').reverse().reduce((prev, el, index) => el + (index % 3 ? '' : ' ') + prev, "")
+			return `${tmp.toFixed(2)} ${type.label} (${size} Б)`
+		}
 	},
 	mounted() {
 		this.backup_updateList()

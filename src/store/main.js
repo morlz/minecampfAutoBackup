@@ -22,6 +22,7 @@ const actions = {
 		commit,
 		dispatch
 	}, payload) {
+		console.log(payload)
 		Alert.create({
 			html: payload,
 		})

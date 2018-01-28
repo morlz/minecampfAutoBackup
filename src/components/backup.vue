@@ -29,6 +29,25 @@
 			</q-field>
 		</div>
 
+		<q-field class="limited" v-if="local.settings.space">
+			<q-checkbox v-model="local.settings.space.limited" label="Ограничить место"/>
+		</q-field>
+
+		<q-slide-transition>
+			<div class="horGroup" v-if="local.settings.space && local.settings.space.limited">
+				<q-field class="limitAmount" icon="storage">
+					<q-input v-model.number="local.settings.space.limit" float-label="Лимит памяти" @keyup="saveSettings" />
+				</q-field>
+
+				<q-select class="limitType"
+					v-model="local.settings.space.type"
+					float-label="Ед. изм."
+					:options="settings_types"
+					/>
+			</div>
+		</q-slide-transition>
+
+
 		<div class="buttons">
 			<q-btn color="primary" @click="server_run ? server_down() : server_up()">{{ toggleServerButtonName }}</q-btn>
 			<q-btn color="primary" @click="timer_run ? timer_stop() : timer_start()">{{ toggleBackupButtonName }}</q-btn>
@@ -45,7 +64,10 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import {
 	QField,
 	QInput,
-	QBtn
+	QBtn,
+	QCheckbox,
+	QSelect,
+	QSlideTransition
 } from 'quasar'
 
 import { ipcRenderer } from 'electron'
@@ -55,7 +77,10 @@ export default {
 	components: {
 		QField,
 		QInput,
-		QBtn
+		QBtn,
+		QCheckbox,
+		QSelect,
+		QSlideTransition
 	},
 	data () {
 		return {
@@ -65,6 +90,11 @@ export default {
 						to: '',
 						from: '',
 						exec: ''
+					},
+					space: {
+						limit: '1',
+						limited: false,
+						type: 3,
 					},
 					timing: {
 						interval: "1",
@@ -85,6 +115,22 @@ export default {
 			if (n != this.local.settings.timing.interval && n)
 				this.saveSettings()
 		},
+		'local.settings.space.limit' (n) {
+			if (+n === Infinity) {
+				this.local.settings.space.limited = false
+				this.local.settings.space.limit = "1"
+			}
+			if (isNaN(+n)) this.local.settings.space.limit = "1"
+			if (+n < 1) this.local.settings.space.limit = "1"
+			if (n != this.local.settings.space.limit && n)
+				this.saveSettings()
+		},
+		'local.settings.space.limited' () {
+			this.saveSettings()
+		},
+		'local.settings.space.type' () {
+			this.saveSettings()
+		},
 		'local.settings.index' (n) {
 			if (isNaN(+n)) this.local.settings.index = "1"
 			if (+n < 1) this.local.settings.index = "1"
@@ -100,6 +146,7 @@ export default {
 			'settings_status_to',
 			'settings_status_from',
 			'settings_status_exec',
+			'settings_types',
 			'app_now'
 		]),
 		toggleBackupButtonName () {
@@ -148,6 +195,11 @@ export default {
 			grid-auto-flow: column;
 			margin-bottom: 10px;
 			grid-gap: 20px;
+			align-items: center;
+		}
+
+		.limited {
+			margin-bottom: 10px;
 		}
 
 		.buttons {
