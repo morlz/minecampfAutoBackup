@@ -3,7 +3,7 @@
 const
 	electron = require('electron'),
 	path = require('path'),
-	config = require('../config/electron'),
+	config = require('../config/electron.js'),
 	app = electron.app,
 	BrowserWindow = electron.BrowserWindow
 
@@ -17,7 +17,7 @@ function createWindow() {
 	 * Initial window options
 	 */
 	mainWindow = new BrowserWindow({
-		title: config.name,
+		title: config.name || "Minecampf Auto Backup v2.0",
 
 		//width: 1600,
 		width: 765,

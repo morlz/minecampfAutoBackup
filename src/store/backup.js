@@ -8,7 +8,12 @@ fs.size = (...args) => new Promise((resolve, reject) => folderSize(...args, (err
 
 const state = {
 	list: [],
-	fsWatcher: false
+	fsWatcher: false,
+	work: {
+		backup: false,
+		creteSpace: false,
+		restore: false
+	}
 }
 
 const actions = {
@@ -20,6 +25,8 @@ const actions = {
 
 		if (!getters.settings_status.to)
 			return dispatch('alert', 'Некуда копировать')
+
+		commit('backup_workSet', { type: 'backup', payload: true })
 
 		let index = isNaN(+getters.settings.index) ? "0" : (+getters.settings.index + 1) + "",
 			worldName = `world_${index}_${Date.now()}`,
@@ -49,8 +56,12 @@ const actions = {
 		} catch (err) {
 			dispatch('alert', `Ошибка копирования ${err}`)
 		}
+
+		commit('backup_workSet', { type: 'backup', payload: false })
+		await dispatch('backup_updateList')
 	},
 	async backup_createSpace({ commit, dispatch, getters }, payload){
+		commit('backup_workSet', { type: 'createSpace', payload: true })
 		let curSize = await fs.size(getters.settings.path.to),
 			needSpace = curSize - payload
 
@@ -62,6 +73,8 @@ const actions = {
 		} catch (err) {
 			dispatch('alert', `Ошибка создания свободного места ${err}`)
 		}
+
+		commit('backup_workSet', { type: 'createSpace', payload: false })
 	},
 	async backup_removeLast({ commit, dispatch, getters }){
 		let daysBiggerThatOne = getters.backup_list.filter(el => el.items.length > 1 && el.date != dateFormat(new Date(), "yyyy-mm-dd"))
@@ -111,18 +124,25 @@ const actions = {
 		if (!getters.timer_run) return
 		dispatch('backup_now')
 	},
-	backup_watch({ commit, dispatch, getters }) {
+	backup_watch({ commit, dispatch, getters, state }) {
 		if (!getters.settings_status.to) return
+		if (state.fsWatcher) return
 
 		let watcher = fs.watch(getters.settings.path.to)
-		watcher.on('change', (e, data) => dispatch('backup_updateList'))
+		watcher.on('change', (e, data) => dispatch('backup_watcher'))
 		commit('backup_fsWatcherSet', watcher)
 	},
 	backup_unWatch({ commit, dispatch, getters }) {
-		if (getters.backup_fsWatcher)
+		if (getters.backup_fsWatcher) {
+			getters.backup_fsWatcher.removeAllListeners('change')
 			getters.backup_fsWatcher.close()
+		}
 
 		commit('backup_fsWatcherSet', false)
+	},
+	backup_watcher ({ commit, dispatch, state, getters }, payload) {
+		if (getters.backup_anyWork) return
+		dispatch('backup_updateList')
 	},
 	async backup_restore({ commit, dispatch, getters }, payload) {
 		let backupPath = getters.settings.path.to.split('/')
@@ -134,6 +154,8 @@ const actions = {
 
 		if (!fs.existsSync(getters.settings.path.from))
 			return dispatch('alert', 'Указаный бекап не существует')
+
+		commit('backup_workSet', { type: 'restore', payload: true })
 
 		let oldPath = getters.settings.path.from + '_old'
 
@@ -147,12 +169,15 @@ const actions = {
 		} catch (err) {
 			dispatch('alert', err)
 		}
+
+		commit('backup_workSet', { type: 'restore', payload: false })
 	}
 }
 
 const mutations = {
 	backup_listSet: (state, payload) => state.list = payload,
-	backup_fsWatcherSet: (state, payload) => state.fsWatcher = payload
+	backup_fsWatcherSet: (state, payload) => state.fsWatcher = payload,
+	backup_workSet: (state, payload) => state.work[payload.type] = payload.payload,
 }
 
 const getters = {
@@ -195,7 +220,8 @@ const getters = {
 			}
 		}).sort(sortFnFactory('date'))
 	},
-	backup_fsWatcher: state => state.fsWatcher
+	backup_fsWatcher: state => state.fsWatcher,
+	backup_anyWork: state => { for (var prop in state.work) if (state.work.hasOwnProperty(prop) && state.work[prop]) return true }
 }
 
 export default {
